@@ -13,6 +13,11 @@ const {
     saveFeedback
 } = require("./agent");
 
+const {
+    getInvoiceHistory,
+    getVendorHistory
+} = require("./services/invoiceService");
+
 const app = express();
 
 app.use(cors());
@@ -62,6 +67,24 @@ app.post("/api/invoices/analyze", async (req, res) => {
     }
 });
 
+app.get("/api/invoices/history", async (req, res) => {
+    try {
+        const history = await getInvoiceHistory();
+
+        res.json({
+            success: true,
+            history
+        });
+
+    } catch (error) {
+        console.error("Failed to fetch invoice history:", error);
+
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
 
 // Save human feedback
 app.post("/api/feedback", async (req, res) => {

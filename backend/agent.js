@@ -10,6 +10,10 @@ const {
     analyzeWithLLM
 } = require("./llm");
 
+const {
+    saveInvoiceDecision
+} = require("./services/invoiceService");
+
 const vendorsPath = path.join(
     __dirname,
     "data",
@@ -135,9 +139,6 @@ async function analyzeInvoice(invoice) {
      * ---------------------------------------------------------
      * 2. HUMAN FEEDBACK MEMORY
      * ---------------------------------------------------------
-     *
-     * Specifically ask Hindsight for previous human
-     * decisions and corrections.
      */
 
     const feedbackMemoryQuery = `
@@ -195,8 +196,6 @@ async function analyzeInvoice(invoice) {
      * ---------------------------------------------------------
      * 4. KEEP ONLY A SMALL NUMBER OF MEMORIES
      * ---------------------------------------------------------
-     *
-     * This prevents the Groq prompt from becoming too large.
      */
 
     const compactMemories =
@@ -225,7 +224,7 @@ async function analyzeInvoice(invoice) {
 
     /*
      * ---------------------------------------------------------
-     * 6. REMEMBER THIS INVOICE ANALYSIS
+     * 6. REMEMBER THIS INVOICE ANALYSIS IN HINDSIGHT
      * ---------------------------------------------------------
      */
 
@@ -262,15 +261,60 @@ async function analyzeInvoice(invoice) {
 
     /*
      * ---------------------------------------------------------
-     * 7. RETURN EVERYTHING TO THE FRONTEND
+     * 7. SAVE DECISION TO MYSQL
+     * ---------------------------------------------------------
+     */
+
+    const databaseId = await saveInvoiceDecision({
+
+        invoice_number:
+            invoice.invoice_number || null,
+
+        vendor_name:
+            invoice.vendor_name,
+
+        amount:
+            invoice.amount,
+
+        shipping:
+            invoice.shipping,
+
+        total_amount:
+            invoice.total_amount,
+
+        decision:
+            decision.decision,
+
+        confidence:
+            decision.confidence,
+
+        reason:
+            decision.reason,
+
+        recommendation:
+            decision.recommendation
+    });
+
+
+    /*
+     * ---------------------------------------------------------
+     * 8. RETURN EVERYTHING TO THE FRONTEND
      * ---------------------------------------------------------
      */
 
     return {
+
         invoice,
+
         vendor,
-        memories: compactMemories,
-        decision
+
+        memories:
+            compactMemories,
+
+        decision,
+
+        database_id:
+            databaseId
     };
 }
 
@@ -315,8 +359,11 @@ async function saveFeedback(feedback) {
 
 
     return {
+
         success: true,
-        message: "Human feedback saved to Hindsight."
+
+        message:
+            "Human feedback saved to Hindsight."
     };
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
@@ -30,8 +30,72 @@ function App() {
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [history, setHistory] = useState([]);
   const [activeView, setActiveView] = useState("dashboard");
+  useEffect(() => {
+  const loadHistory = async () => {
+    try {
+      const response = await axios.get(
+        `${API}/api/invoices/history`
+      );
+
+      const databaseHistory = response.data.history || [];
+
+      const formattedHistory = databaseHistory.map((item) => ({
+        id: item.id,
+        vendor: item.vendor_name,
+        amount: Number(item.invoice_amount) || 0,
+        decision:
+          item.ai_decision?.toUpperCase() || "REVIEW",
+        confidence:
+          Number(item.confidence) || 0,
+        time: new Date(item.created_at).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }));
+
+      setHistory(formattedHistory);
+
+    } catch (error) {
+      console.error(
+        "Unable to load invoice history:",
+        error
+      );
+    }
+  };
+
+  loadHistory();
+}, []);
+const [darkMode, setDarkMode] = useState(false);
 
   const profile = vendorProfiles[vendor];
+  const totalInvoices = history.length;
+
+const approvedInvoices = history.filter(
+  (item) => item.decision === "APPROVE"
+).length;
+
+const reviewInvoices = history.filter(
+  (item) => item.decision === "REVIEW"
+).length;
+
+const holdInvoices = history.filter(
+  (item) => item.decision === "HOLD"
+).length;
+
+const averageConfidence =
+  history.length > 0
+    ? Math.round(
+        history.reduce(
+          (total, item) => total + Number(item.confidence || 0),
+          0
+        ) / history.length
+      )
+    : 0;
+
+const totalExposure = history.reduce(
+  (total, item) => total + Number(item.amount || 0),
+  0
+);
 
   const analyzeInvoice = async () => {
   if (!amount || !shipping) {
@@ -127,7 +191,7 @@ function App() {
   const memories = result?.memories || [];
 
   return (
-    <div className="app">
+    <div className={`app ${darkMode ? "dark-mode" : ""}`}>
       {/* NAVBAR */}
       <header className="navbar">
         <div className="nav-left">
@@ -167,21 +231,31 @@ function App() {
         </nav>
 
         <div className="nav-right">
-          <div className="memory-indicator">
-            <span></span>
-            Hindsight active
-          </div>
 
-          <button
-            className={`avatar profile-avatar ${
-              activeView === "profile" ? "profile-active" : ""
-            }`}
-            onClick={() => setActiveView("profile")}
-            title="Open profile"
-          >
-            M
-          </button>
-        </div>
+  <button
+    className="theme-toggle"
+    onClick={() => setDarkMode((current) => !current)}
+    title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+  >
+    {darkMode ? "☀" : "☾"}
+  </button>
+
+  <div className="memory-indicator">
+    <span></span>
+    Hindsight active
+  </div>
+
+  <button
+    className={`avatar profile-avatar ${
+      activeView === "profile" ? "profile-active" : ""
+    }`}
+    onClick={() => setActiveView("profile")}
+    title="Open profile"
+  >
+    M
+  </button>
+
+</div>
       </header>
 
       {activeView === "dashboard" && (
@@ -1417,76 +1491,644 @@ function App() {
 )}
 
       {activeView === "profile" && (
-        <main className="page-view">
-          <section className="hero-section compact-hero">
+  <main className="page-view">
+
+    {/* PROFILE HERO */}
+
+    <section className="hero-section compact-hero">
+
+      <div>
+
+        <div className="welcome">
+          ACCOUNT
+        </div>
+
+        <h1>
+          My <span>profile.</span>
+        </h1>
+
+        <p>
+          Application, agent configuration and activity
+          information for the current user.
+        </p>
+
+      </div>
+
+
+      <div className="hero-status">
+
+        <div className="status-icon">
+          M
+        </div>
+
+        <div>
+
+          <span>
+            PROFILE
+          </span>
+
+          <strong>
+            Manasvi Pinnamaneni
+          </strong>
+
+          <small>
+            AP Operations
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    {/* PROFILE + SYSTEM */}
+
+    <section className="profile-grid enhanced-profile-grid">
+
+      {/* USER PROFILE */}
+
+      <div className="card profile-card enhanced-profile-card">
+
+        <div className="profile-card-header">
+
+          <div className="profile-large-avatar">
+            M
+          </div>
+
+          <div>
+
+            <span className="eyebrow">
+              USER PROFILE
+            </span>
+
+            <h2>
+              Manasvi Pinnamaneni
+            </h2>
+
+            <p>
+              AP Operations Analyst
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div className="profile-details">
+
+          <div className="profile-detail">
+            <span>Application</span>
+            <strong>AP Intelligence</strong>
+          </div>
+
+          <div className="profile-detail">
+            <span>Memory system</span>
+            <strong>Hindsight</strong>
+          </div>
+
+          <div className="profile-detail">
+            <span>LLM provider</span>
+            <strong>Groq</strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* SYSTEM STATUS */}
+
+      <div className="card profile-card system-card">
+
+        <span className="eyebrow">
+          SYSTEM STATUS
+        </span>
+
+        <h2>
+          Agent services
+        </h2>
+
+
+        <div className="system-status-row">
+
+          <span>
+            <i className="status-dot"></i>
+            Hindsight
+          </span>
+
+          <strong>
+            Active
+          </strong>
+
+        </div>
+
+
+        <div className="system-status-row">
+
+          <span>
+            <i className="status-dot"></i>
+            Invoice analysis
+          </span>
+
+          <strong>
+            Ready
+          </strong>
+
+        </div>
+
+
+        <div className="system-status-row">
+
+          <span>
+            <i className="status-dot"></i>
+            Human feedback
+          </span>
+
+          <strong>
+            Enabled
+          </strong>
+
+        </div>
+
+
+        <div className="system-status-row">
+
+          <span>
+            <i className="status-dot"></i>
+            AP memory
+          </span>
+
+          <strong>
+            Persistent
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    {/* ACTIVITY */}
+
+    <section className="profile-activity-section">
+
+      <div className="section-heading">
+
+        <div>
+
+          <span className="eyebrow">
+            YOUR ACTIVITY
+          </span>
+
+          <h2>
+            Agent usage
+          </h2>
+
+        </div>
+
+        <span className="history-total">
+          Current session
+        </span>
+
+      </div>
+
+
+      <div className="activity-grid">
+
+
+        {/* TOTAL */}
+
+        <div className="card activity-card">
+
+          <div className="activity-icon">
+            ◉
+          </div>
+
+          <div>
+
+            <span>
+              INVOICES ANALYZED
+            </span>
+
+            <strong>
+              {totalInvoices}
+            </strong>
+
+            <small>
+              Current browser session
+            </small>
+
+          </div>
+
+        </div>
+
+
+        {/* APPROVED */}
+
+        <div className="card activity-card">
+
+          <div className="activity-icon approve-icon">
+            ✓
+          </div>
+
+          <div>
+
+            <span>
+              APPROVED
+            </span>
+
+            <strong>
+              {approvedInvoices}
+            </strong>
+
+            <small>
+              Agent recommendations
+            </small>
+
+          </div>
+
+        </div>
+
+
+        {/* REVIEW */}
+
+        <div className="card activity-card">
+
+          <div className="activity-icon review-icon">
+            !
+          </div>
+
+          <div>
+
+            <span>
+              SENT FOR REVIEW
+            </span>
+
+            <strong>
+              {reviewInvoices}
+            </strong>
+
+            <small>
+              Requires human attention
+            </small>
+
+          </div>
+
+        </div>
+
+
+        {/* CONFIDENCE */}
+
+        <div className="card activity-card">
+
+          <div className="activity-icon confidence-icon">
+            ✦
+          </div>
+
+          <div>
+
+            <span>
+              AVG. CONFIDENCE
+            </span>
+
+            <strong>
+              {averageConfidence}%
+            </strong>
+
+            <small>
+              Across analyzed invoices
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* EXPOSURE */}
+
+      <div className="card exposure-card">
+
+        <div>
+
+          <span className="eyebrow">
+            ANALYZED EXPOSURE
+          </span>
+
+          <h3>
+            ₹{totalExposure.toLocaleString("en-IN")}
+          </h3>
+
+          <p>
+            Total invoice value analyzed during this
+            browser session.
+          </p>
+
+        </div>
+
+
+        <div className="exposure-symbol">
+          ₹
+        </div>
+
+      </div>
+
+    </section>
+
+
+    {/* AI CONFIGURATION + LEARNING FLOW */}
+
+    <section className="profile-feature-grid">
+
+
+      {/* AI CONFIGURATION */}
+
+      <div className="card profile-feature-card">
+
+        <div className="feature-heading">
+
+          <div className="feature-icon">
+            ⚙
+          </div>
+
+          <div>
+
+            <span className="eyebrow">
+              AI CONFIGURATION
+            </span>
+
+            <h2>
+              Agent configuration
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div className="configuration-list">
+
+
+          <div className="configuration-row">
+
             <div>
-              <div className="welcome">ACCOUNT</div>
-              <h1>My <span>profile.</span></h1>
-              <p>
-                Application and agent information for the current user.
-              </p>
+
+              <strong>
+                Memory system
+              </strong>
+
+              <small>
+                Persistent agent memory
+              </small>
+
             </div>
 
-            <div className="hero-status">
-              <div className="status-icon">M</div>
-              <div>
-                <span>PROFILE</span>
-                <strong>Manasvi Pinnamaneni</strong>
-                <small>AP Operations</small>
-              </div>
-            </div>
-          </section>
+            <span className="configuration-status">
+              Hindsight
+            </span>
 
-          <section className="profile-grid">
-            <div className="card profile-card">
-              <div className="profile-large-avatar">M</div>
-              <span className="eyebrow">USER PROFILE</span>
-              <h2>Manasvi Pinnamaneni</h2>
-              <p>AP Operations Analyst</p>
+          </div>
 
-              <div className="profile-detail">
-                <span>Application</span>
-                <strong>AP Intelligence</strong>
-              </div>
 
-              <div className="profile-detail">
-                <span>Memory system</span>
-                <strong>Hindsight</strong>
-              </div>
+          <div className="configuration-row">
 
-              <div className="profile-detail">
-                <span>LLM provider</span>
-                <strong>Groq</strong>
-              </div>
+            <div>
+
+              <strong>
+                LLM provider
+              </strong>
+
+              <small>
+                Invoice reasoning engine
+              </small>
+
             </div>
 
-            <div className="card profile-card">
-              <span className="eyebrow">SYSTEM STATUS</span>
-              <h2>Agent services</h2>
+            <span className="configuration-status">
+              Groq
+            </span>
 
-              <div className="system-status-row">
-                <span><i className="status-dot"></i> Hindsight</span>
-                <strong>Active</strong>
-              </div>
+          </div>
 
-              <div className="system-status-row">
-                <span><i className="status-dot"></i> Invoice analysis</span>
-                <strong>Ready</strong>
-              </div>
 
-              <div className="system-status-row">
-                <span><i className="status-dot"></i> Human feedback</span>
-                <strong>Enabled</strong>
-              </div>
+          <div className="configuration-row">
 
-              <div className="system-status-row">
-                <span><i className="status-dot"></i> AP memory</span>
-                <strong>Persistent</strong>
-              </div>
+            <div>
+
+              <strong>
+                Human feedback
+              </strong>
+
+              <small>
+                Reviewer decisions can teach the agent
+              </small>
+
             </div>
-          </section>
-        </main>
-      )}
+
+            <span className="configuration-active">
+              ✓ Enabled
+            </span>
+
+          </div>
+
+
+          <div className="configuration-row">
+
+            <div>
+
+              <strong>
+                Learning mode
+              </strong>
+
+              <small>
+                Historical context used for future analysis
+              </small>
+
+            </div>
+
+            <span className="configuration-active">
+              ✓ Active
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* HOW THE AGENT LEARNS */}
+
+      <div className="card profile-feature-card">
+
+        <div className="feature-heading">
+
+          <div className="feature-icon memory-feature-icon">
+            🧠
+          </div>
+
+          <div>
+
+            <span className="eyebrow">
+              AGENT WORKFLOW
+            </span>
+
+            <h2>
+              How your agent learns
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <div className="learning-flow">
+
+
+          <div className="flow-step">
+
+            <div className="flow-number">
+              01
+            </div>
+
+            <div>
+
+              <strong>
+                Invoice
+              </strong>
+
+              <small>
+                Current invoice details
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div className="flow-connector"></div>
+
+
+          <div className="flow-step">
+
+            <div className="flow-number memory-flow">
+              🧠
+            </div>
+
+            <div>
+
+              <strong>
+                Hindsight
+              </strong>
+
+              <small>
+                Recall relevant history
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div className="flow-connector"></div>
+
+
+          <div className="flow-step">
+
+            <div className="flow-number">
+              ✦
+            </div>
+
+            <div>
+
+              <strong>
+                AI decision
+              </strong>
+
+              <small>
+                Analyze current context
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div className="flow-connector"></div>
+
+
+          <div className="flow-step">
+
+            <div className="flow-number human-flow">
+              👤
+            </div>
+
+            <div>
+
+              <strong>
+                Human feedback
+              </strong>
+
+              <small>
+                Confirm or override
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div className="flow-connector"></div>
+
+
+          <div className="flow-step">
+
+            <div className="flow-number saved-flow">
+              ✓
+            </div>
+
+            <div>
+
+              <strong>
+                Memory updated
+              </strong>
+
+              <small>
+                Experience available later
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    {/* FOOTNOTE */}
+
+    <div className="profile-note">
+
+      <span>
+        ✦
+      </span>
+
+      <p>
+        AP Intelligence combines current invoice data,
+        vendor history and human feedback to improve
+        future invoice analysis.
+      </p>
+
+    </div>
+
+  </main>
+)}
 
       <footer>
         <span>AP Intelligence</span>

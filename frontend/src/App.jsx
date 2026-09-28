@@ -29,6 +29,7 @@ function App() {
   const [result, setResult] = useState(null);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [history, setHistory] = useState([]);
+  const [activeView, setActiveView] = useState("dashboard");
 
   const profile = vendorProfiles[vendor];
 
@@ -143,9 +144,26 @@ function App() {
         </div>
 
         <nav>
-          <button className="nav-link active">Dashboard</button>
-          <button className="nav-link">Vendors</button>
-          <button className="nav-link">Decisions</button>
+          <button
+            className={`nav-link ${activeView === "dashboard" ? "active" : ""}`}
+            onClick={() => setActiveView("dashboard")}
+          >
+            Dashboard
+          </button>
+
+          <button
+            className={`nav-link ${activeView === "vendors" ? "active" : ""}`}
+            onClick={() => setActiveView("vendors")}
+          >
+            Vendors
+          </button>
+
+          <button
+            className={`nav-link ${activeView === "decisions" ? "active" : ""}`}
+            onClick={() => setActiveView("decisions")}
+          >
+            Decisions
+          </button>
         </nav>
 
         <div className="nav-right">
@@ -154,11 +172,20 @@ function App() {
             Hindsight active
           </div>
 
-          <div className="avatar">M</div>
+          <button
+            className={`avatar profile-avatar ${
+              activeView === "profile" ? "profile-active" : ""
+            }`}
+            onClick={() => setActiveView("profile")}
+            title="Open profile"
+          >
+            M
+          </button>
         </div>
       </header>
 
-      <main>
+      {activeView === "dashboard" && (
+        <main>
         {/* HERO */}
         <section className="hero-section">
           <div>
@@ -686,6 +713,780 @@ function App() {
           )}
         </section>
       </main>
+        )}
+
+      {activeView === "vendors" && (
+  <main className="page-view">
+
+    <section className="hero-section compact-hero">
+
+      <div>
+
+        <div className="welcome">
+          VENDOR INTELLIGENCE
+        </div>
+
+        <h1>
+          Know your <span>vendors.</span>
+        </h1>
+
+        <p>
+          See what AP Intelligence knows about each vendor
+          and how historical experience can influence future
+          invoice decisions.
+        </p>
+
+      </div>
+
+
+      <div className="hero-status">
+
+        <div className="status-icon">
+          🧠
+        </div>
+
+        <div>
+
+          <span>
+            AGENT MEMORY
+          </span>
+
+          <strong>
+            Hindsight
+          </strong>
+
+          <small>
+            Vendor experience retained
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section className="vendor-directory">
+
+      {Object.entries(vendorProfiles).map(
+        ([name, vendor]) => {
+
+          const isABC =
+            name === "ABC Industrial Supplies";
+
+
+          return (
+
+            <div
+              className="card vendor-directory-card"
+              key={name}
+            >
+
+              {/* VENDOR HEADER */}
+
+              <div className="vendor-profile">
+
+                <div className="vendor-avatar">
+                  {vendor.initials}
+                </div>
+
+                <div>
+
+                  <h3>
+                    {name}
+                  </h3>
+
+                  <p>
+                    Known vendor profile
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              {/* CORE PROFILE */}
+
+              <div className="stats-grid">
+
+                <Stat
+                  label="Typical invoices"
+                  value={vendor.range}
+                />
+
+                <Stat
+                  label="Typical shipping"
+                  value={vendor.shipping}
+                />
+
+                <Stat
+                  label="Payment terms"
+                  value={vendor.terms}
+                />
+
+                <Stat
+                  label="Approval threshold"
+                  value={vendor.threshold}
+                />
+
+              </div>
+
+
+              {/* MEMORY PROFILE */}
+
+              <div className="vendor-memory-profile">
+
+                <div className="vendor-memory-heading">
+
+                  <div className="memory-symbol">
+                    🧠
+                  </div>
+
+                  <div>
+
+                    <span>
+                      HINDSIGHT MEMORY
+                    </span>
+
+                    <strong>
+                      What the agent has learned
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                {isABC ? (
+
+                  <div className="learning-list">
+
+                    <div className="learning-item">
+
+                      <span className="learning-check">
+                        ✓
+                      </span>
+
+                      <p>
+                        Invoices around ₹70K–₹75K can
+                        normally be approved when other
+                        checks pass.
+                      </p>
+
+                    </div>
+
+
+                    <div className="learning-item">
+
+                      <span className="learning-check">
+                        ✓
+                      </span>
+
+                      <p>
+                        Higher-value invoices require
+                        additional verification.
+                      </p>
+
+                    </div>
+
+
+                    <div className="learning-item">
+
+                      <span className="learning-check">
+                        ✓
+                      </span>
+
+                      <p>
+                        Unusually high shipping should
+                        trigger additional review.
+                      </p>
+
+                    </div>
+
+
+                    <div className="learning-item warning-learning">
+
+                      <span className="learning-warning">
+                        !
+                      </span>
+
+                      <p>
+                        A previous invoice contained a
+                        duplicate shipping charge that
+                        was corrected.
+                      </p>
+
+                    </div>
+
+
+                    <div className="learning-item human-learning">
+
+                      <span className="learning-human">
+                        👤
+                      </span>
+
+                      <p>
+                        A previous high-value invoice was
+                        approved after purchase-order and
+                        supporting-document verification.
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                ) : (
+
+                  <div className="learning-list">
+
+                    <div className="learning-item">
+
+                      <span className="learning-check">
+                        ✓
+                      </span>
+
+                      <p>
+                        Normal invoices are generally
+                        within the ₹20K–₹45K range.
+                      </p>
+
+                    </div>
+
+
+                    <div className="learning-item">
+
+                      <span className="learning-check">
+                        ✓
+                      </span>
+
+                      <p>
+                        Shipping around ₹1K–₹3K is within
+                        the normal vendor pattern.
+                      </p>
+
+                    </div>
+
+
+                    <div className="learning-item">
+
+                      <span className="learning-warning">
+                        !
+                      </span>
+
+                      <p>
+                        Amounts above the ₹50K approval
+                        threshold should receive additional
+                        review.
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                )}
+
+              </div>
+
+
+              {/* MEMORY STATUS */}
+
+              <div className="vendor-memory-status">
+
+                <div>
+
+                  <span>
+                    MEMORY STATUS
+                  </span>
+
+                  <strong>
+                    ● Active
+                  </strong>
+
+                </div>
+
+                <small>
+                  Historical context can influence
+                  future decisions.
+                </small>
+
+              </div>
+
+
+              {/* ACTION */}
+
+              <button
+                className="analyze-btn vendor-use-btn"
+                onClick={() => {
+
+                  setVendor(name);
+
+                  setActiveView("dashboard");
+
+                  setResult(null);
+
+                }}
+              >
+
+                Analyze an invoice for this vendor
+
+                <span>
+                  →
+                </span>
+
+              </button>
+
+            </div>
+
+          );
+
+        }
+      )}
+
+    </section>
+
+  </main>
+)}
+
+      {activeView === "decisions" && (
+  <main className="page-view">
+
+    <section className="hero-section compact-hero">
+
+      <div>
+
+        <div className="welcome">
+          DECISION INTELLIGENCE
+        </div>
+
+        <h1>
+          See how the agent <span>decides.</span>
+        </h1>
+
+        <p>
+          Follow every invoice from initial analysis to
+          Hindsight memory and human feedback.
+        </p>
+
+      </div>
+
+      <div className="hero-status">
+
+        <div className="status-icon">
+          🧠
+        </div>
+
+        <div>
+          <span>DECISION MEMORY</span>
+
+          <strong>
+            {history.length} decisions
+          </strong>
+
+          <small>
+            Current browser session
+          </small>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section className="decision-timeline-section">
+
+      {history.length === 0 ? (
+
+        <div className="empty-history card">
+
+          <div className="waiting-icon">
+            ✦
+          </div>
+
+          <h3>
+            No decisions yet.
+          </h3>
+
+          <p>
+            Analyze an invoice from the Dashboard to
+            create your first decision timeline.
+          </p>
+
+          <button
+            className="analyze-btn"
+            onClick={() => setActiveView("dashboard")}
+          >
+            Analyze an invoice
+            <span>→</span>
+          </button>
+
+        </div>
+
+      ) : (
+
+        <div className="decision-timeline">
+
+          {history.map((item, index) => (
+
+            <div
+              className="timeline-card card"
+              key={item.id}
+            >
+
+              {/* HEADER */}
+
+              <div className="timeline-header">
+
+                <div className="timeline-invoice">
+
+                  <div className="vendor-avatar">
+                    {item.vendor
+                      .substring(0, 2)
+                      .toUpperCase()}
+                  </div>
+
+                  <div>
+
+                    <span className="eyebrow">
+                      INVOICE ANALYSIS
+                    </span>
+
+                    <h2>
+                      {item.vendor}
+                    </h2>
+
+                    <p>
+                      Analyzed at {item.time}
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="timeline-result">
+
+                  <DecisionBadge
+                    decision={item.decision}
+                  />
+
+                  <strong>
+                    {item.confidence}%
+                  </strong>
+
+                  <span>
+                    confidence
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              {/* TIMELINE */}
+
+              <div className="decision-flow">
+
+
+                {/* STEP 1 */}
+
+                <div className="timeline-step">
+
+                  <div className="timeline-node">
+                    1
+                  </div>
+
+                  <div className="timeline-content">
+
+                    <span>
+                      INVOICE RECEIVED
+                    </span>
+
+                    <strong>
+                      Invoice entered for analysis
+                    </strong>
+
+                    <p>
+                      ₹{item.amount.toLocaleString("en-IN")}
+                      {" "}invoice amount
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                {/* CONNECTOR */}
+
+                <div className="timeline-line"></div>
+
+
+                {/* STEP 2 */}
+
+                <div className="timeline-step">
+
+                  <div className="timeline-node memory-node">
+                    🧠
+                  </div>
+
+                  <div className="timeline-content">
+
+                    <span>
+                      HINDSIGHT MEMORY
+                    </span>
+
+                    <strong>
+                      Historical vendor context recalled
+                    </strong>
+
+                    <p>
+                      The agent checks previous invoices,
+                      exceptions and human decisions before
+                      making its recommendation.
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="timeline-line"></div>
+
+
+                {/* STEP 3 */}
+
+                <div className="timeline-step">
+
+                  <div className="timeline-node ai-node">
+                    ✦
+                  </div>
+
+                  <div className="timeline-content">
+
+                    <span>
+                      AI ANALYSIS
+                    </span>
+
+                    <strong>
+                      Invoice compared with vendor history
+                    </strong>
+
+                    <p>
+                      Amount, shipping and historical context
+                      are evaluated together.
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="timeline-line"></div>
+
+
+                {/* STEP 4 */}
+
+                <div className="timeline-step">
+
+                  <div
+                    className={`timeline-node decision-node ${item.decision.toLowerCase()}`}
+                  >
+                    {item.decision === "APPROVE"
+                      ? "✓"
+                      : item.decision === "REVIEW"
+                      ? "!"
+                      : "×"}
+                  </div>
+
+                  <div className="timeline-content">
+
+                    <span>
+                      AGENT RECOMMENDATION
+                    </span>
+
+                    <strong>
+                      {item.decision}
+                    </strong>
+
+                    <p>
+                      The agent produced this recommendation
+                      with {item.confidence}% confidence.
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="timeline-line"></div>
+
+
+                {/* STEP 5 */}
+
+                <div className="timeline-step">
+
+                  <div className="timeline-node human-node">
+                    👤
+                  </div>
+
+                  <div className="timeline-content">
+
+                    <span>
+                      HUMAN-IN-THE-LOOP
+                    </span>
+
+                    <strong>
+                      Reviewer can confirm or override
+                    </strong>
+
+                    <p>
+                      Human feedback is sent back to the agent
+                      and stored as persistent memory.
+                    </p>
+
+                  </div>
+
+                </div>
+
+
+                <div className="timeline-line"></div>
+
+
+                {/* STEP 6 */}
+
+                <div className="timeline-step">
+
+                  <div className="timeline-node saved-node">
+                    ✓
+                  </div>
+
+                  <div className="timeline-content">
+
+                    <span>
+                      MEMORY UPDATED
+                    </span>
+
+                    <strong>
+                      Learning available for future invoices
+                    </strong>
+
+                    <p>
+                      The experience can influence future
+                      analysis for this vendor.
+                    </p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              {/* FOOTER */}
+
+              <div className="timeline-footer">
+
+                <div>
+
+                  <span>
+                    DECISION MEMORY
+                  </span>
+
+                  <strong>
+                    Hindsight → Decision → Learning
+                  </strong>
+
+                </div>
+
+                <div className="timeline-arrow">
+                  →
+                </div>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
+
+    </section>
+
+  </main>
+)}
+
+      {activeView === "profile" && (
+        <main className="page-view">
+          <section className="hero-section compact-hero">
+            <div>
+              <div className="welcome">ACCOUNT</div>
+              <h1>My <span>profile.</span></h1>
+              <p>
+                Application and agent information for the current user.
+              </p>
+            </div>
+
+            <div className="hero-status">
+              <div className="status-icon">M</div>
+              <div>
+                <span>PROFILE</span>
+                <strong>Manasvi Pinnamaneni</strong>
+                <small>AP Operations</small>
+              </div>
+            </div>
+          </section>
+
+          <section className="profile-grid">
+            <div className="card profile-card">
+              <div className="profile-large-avatar">M</div>
+              <span className="eyebrow">USER PROFILE</span>
+              <h2>Manasvi Pinnamaneni</h2>
+              <p>AP Operations Analyst</p>
+
+              <div className="profile-detail">
+                <span>Application</span>
+                <strong>AP Intelligence</strong>
+              </div>
+
+              <div className="profile-detail">
+                <span>Memory system</span>
+                <strong>Hindsight</strong>
+              </div>
+
+              <div className="profile-detail">
+                <span>LLM provider</span>
+                <strong>Groq</strong>
+              </div>
+            </div>
+
+            <div className="card profile-card">
+              <span className="eyebrow">SYSTEM STATUS</span>
+              <h2>Agent services</h2>
+
+              <div className="system-status-row">
+                <span><i className="status-dot"></i> Hindsight</span>
+                <strong>Active</strong>
+              </div>
+
+              <div className="system-status-row">
+                <span><i className="status-dot"></i> Invoice analysis</span>
+                <strong>Ready</strong>
+              </div>
+
+              <div className="system-status-row">
+                <span><i className="status-dot"></i> Human feedback</span>
+                <strong>Enabled</strong>
+              </div>
+
+              <div className="system-status-row">
+                <span><i className="status-dot"></i> AP memory</span>
+                <strong>Persistent</strong>
+              </div>
+            </div>
+          </section>
+        </main>
+      )}
 
       <footer>
         <span>AP Intelligence</span>

@@ -1,0 +1,30 @@
+[
+  {
+    "vendor_id": "V001",
+    "vendor_name": "ABC Industrial Supplies",
+    "normal_invoice_range": {
+      "min": 60000,
+      "max": 80000
+    },
+    "payment_terms": "Net 30",
+    "normal_shipping_range": {
+      "min": 3000,
+      "max": 5000
+    },
+    "approval_threshold": 75000
+  },
+  {
+    "vendor_id": "V002",
+    "vendor_name": "Global Office Solutions",
+    "normal_invoice_range": {
+      "min": 20000,
+      "max": 45000
+    },
+    "payment_terms": "Net 45",
+    "normal_shipping_range": {
+      "min": 1000,
+      "max": 3000
+    },
+    "approval_threshold": 50000
+  }
+]
